@@ -26,11 +26,9 @@ class UserController {
 
 		res.status(201).send({id: user._id, email: user.email});
 	}
-	async login(req, res) {
-		// ...
-	}
-	async logout(req, res) {
-		// ...
+	async getMe(req, res) {
+		const user = req.user;
+		res.status(200).send({id: user._id, email: user.email});
 	}
 }
 
