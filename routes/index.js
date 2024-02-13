@@ -1,43 +1,33 @@
-import Router from 'express';
+import { Router } from 'express';
+import AppController from '../controllers/AppController';
+import UsersController from '../controllers/UsersController';
+import AuthController from '../controllers/AuthController';
+import FilesController from '../controllers/FilesController';
 
-class AppRoutes {
-  constructor(
-    appController,
-    userController,
-    authController,
-    authMiddleware,
-    fileController,
-  ) {
+class Routes {
+  constructor() {
     this.router = Router();
-    this.appController = appController;
-    this.userController = userController;
-    this.authController = authController;
-    this.authMiddleware = authMiddleware;
-    this.fileController = fileController;
     this.initializeRoutes();
   }
 
   initializeRoutes() {
-    this.router.get('status', this.appController.getStatus);
-    this.router.get('stats', this.appController.getStats);
-    this.router.post('users', this.userController.register);
-    this.router.get(
-      'connect',
-      this.authMiddleware.authenticate,
-      this.authController.getConnect,
-    );
-    this.router.get('disconnect', this.authController.getDisconnect);
-    this.router.get(
-      'users/me',
-      this.authMiddleware.authenticate,
-      this.userController.getMe,
-    );
-    this.router.post(
-      'files',
-      this.authMiddleware.authenticate,
-      this.fileController.postUpload,
-    );
+    this.router.get('/status', AppController.getStatus);
+    this.router.get('/stats', AppController.getStats);
+    this.router.post('/users', UsersController.postNew);
+    this.router.get('/connect', AuthController.getConnect);
+    this.router.get('/disconnect', AuthController.getDisconnect);
+    this.router.get('/users/me', UsersController.getMe);
+    this.router.post('/files', FilesController.postUpload);
+    this.router.get('/files/:id', FilesController.getShow);
+    this.router.get('/files', FilesController.getIndex);
+    this.router.put('/files/:id/publish', FilesController.putPublish);
+    this.router.put('/files/:id/unpublish', FilesController.putUnpublish);
+    this.router.get('/files/:id/data', FilesController.getFile);
+  }
+
+  getRouter() {
+    return this.router;
   }
 }
 
-export default AppRoutes;
+export default Routes;

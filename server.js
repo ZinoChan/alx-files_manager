@@ -1,31 +1,29 @@
-import express from "express";
-import AppRoute from "./routes";
-import dbClient from "./utils/db";
-import redisClient from "./utils/redis";
-import UserController from "./controllers/UserController";
-class App {
-  port = process.env.PORT || 5000;
+import express from 'express';
+import Routes from './routes';
 
+class App {
   constructor() {
+    this.port = parseInt(process.env.PORT, 10) || 5000;
     this.app = express();
+    this.initializeMiddlewares();
     this.initializeRoutes();
   }
 
-  initializeRoutes() {
-    this.app.use(
-      "/",
-      new AppRoute(
-        new AppController(dbClient, redisClient),
-        new UserController(dbClient, redisClient)
-      )
-    );
+  initializeMiddlewares() {
+    this.app.use(express.json());
   }
 
-  listen() {
+  initializeRoutes() {
+    const routes = new Routes();
+    this.app.use('/', routes.getRouter());
+  }
+
+  start() {
     this.app.listen(this.port, () => {
-      console.log(`App listening on the port ${this.port}`);
+      console.log(`Server running on port ${this.port}`);
     });
   }
 }
 
-export default App;
+const server = new App();
+server.start();
