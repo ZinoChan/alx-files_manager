@@ -3,6 +3,7 @@ class AppController {
     this.db = db;
     this.redis = redis;
   }
+
   static getStatus(req, res) {
     if (this.redis.isAlive && this.db.isAlive()) {
       res.status(200).send({ redis: true, db: this.db.isAlive() });
@@ -20,3 +21,5 @@ class AppController {
     }
   }
 }
+
+export default AppController;

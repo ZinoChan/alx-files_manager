@@ -1,4 +1,4 @@
-import Router from "express";
+import Router from 'express';
 
 class AppRoutes {
   constructor(
@@ -6,7 +6,7 @@ class AppRoutes {
     userController,
     authController,
     authMiddleware,
-    fileController
+    fileController,
   ) {
     this.router = Router();
     this.appController = appController;
@@ -18,24 +18,24 @@ class AppRoutes {
   }
 
   initializeRoutes() {
-    this.router.get("status", this.appController.getStatus);
-    this.router.get("stats", this.appController.getStats);
-    this.router.post("users", this.userController.register);
+    this.router.get('status', this.appController.getStatus);
+    this.router.get('stats', this.appController.getStats);
+    this.router.post('users', this.userController.register);
     this.router.get(
-      "connect",
+      'connect',
       this.authMiddleware.authenticate,
-      this.authController.getConnect
+      this.authController.getConnect,
     );
-    this.router.get("disconnect", this.authController.getDisconnect);
+    this.router.get('disconnect', this.authController.getDisconnect);
     this.router.get(
-      "users/me",
+      'users/me',
       this.authMiddleware.authenticate,
-      this.userController.getMe
+      this.userController.getMe,
     );
     this.router.post(
-      "files",
+      'files',
       this.authMiddleware.authenticate,
-      this.fileController.postUpload
+      this.fileController.postUpload,
     );
   }
 }
