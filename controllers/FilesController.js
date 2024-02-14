@@ -5,29 +5,12 @@ import { ObjectID } from 'mongodb';
 import Queue from 'bull';
 import mime from 'mime-types';
 import dbClient from '../utils/db';
-import redisClient from '../utils/redis';
 
 const fileQueue = new Queue('fileQueue', 'redis://127.0.0.1:6379');
 
 class FilesController {
-  static async getUser(req) {
-    const token = req.header('X-Token');
-    const key = `auth_${token}`;
-    const userId = await redisClient.get(key);
-    if (userId) {
-      const user = await dbClient.db
-        .collection('users')
-        .findOne({ _id: ObjectID(userId) });
-      return user || null;
-    }
-    return null;
-  }
-
   static async postUpload(req, res) {
-    const user = await FilesController.getUser(req);
-    if (!user) {
-      return res.status(401).json({ error: 'Unauthorized' });
-    }
+    const { user } = req;
 
     const {
       name,
@@ -36,8 +19,15 @@ class FilesController {
       isPublic = false,
       data,
     } = req.body;
-    if (!name || !type || (type !== 'folder' && !data)) {
-      return res.status(400).json({ error: 'Missing required fields' });
+
+    if (!name) {
+      return res.status(400).json({ error: 'Missing name' });
+    }
+    if (!type) {
+      return res.status(400).json({ error: 'Missing type' });
+    }
+    if (type !== 'folder' && !data) {
+      return res.status(400).json({ error: 'Missing data' });
     }
 
     const files = dbClient.db.collection('files');
@@ -46,9 +36,7 @@ class FilesController {
         _id: ObjectID(parentId),
         userId: user._id,
       });
-      if (!file) {
-        return res.status(400).json({ error: 'Parent not found' });
-      }
+      if (!file) return res.status(400).json({ error: 'Parent not found' });
       if (file.type !== 'folder') {
         return res.status(400).json({ error: 'Parent is not a folder' });
       }
