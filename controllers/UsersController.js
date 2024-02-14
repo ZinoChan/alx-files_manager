@@ -1,3 +1,4 @@
+/* eslint-disable consistent-return */
 import { createHash } from 'crypto';
 import { ObjectID } from 'mongodb';
 import redis from '../utils/redis';
@@ -12,23 +13,24 @@ class UsersController {
     if (!password) return res.status(400).json({ error: 'Missing password' });
 
     try {
-      const existingUser = await this.db.usersCollection.findOne({ email });
+      const users = dbClient.db.collection('users');
+      const existingUser = await users.findOne({ email });
       if (existingUser) return res.status(400).json({ error: 'Email already exists' });
 
       const hashedPassword = createHash('sha1').update(password).digest('hex');
 
-      const newUser = await dbClient.usersCollection.insertOne({
+      const result = await users.insertOne({
         email,
         password: hashedPassword,
       });
-      return res.status(201).json({ id: newUser._id, email: newUser.email });
+      const newUser = result.ops[0];
+      res.status(201).json({ id: newUser._id, email: newUser.email });
     } catch (error) {
       console.error('Error creating user:', error);
-      return res.status(500).json({ error: 'Internal server error' });
+      res.status(500).json({ error: 'Internal server error' });
     }
   }
 
-  // eslint-disable-next-line consistent-return
   static async getMe(req, res) {
     const token = req.header('X-Token');
     if (!token) return res.status(401).json({ error: 'Unauthorized' });
